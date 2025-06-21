@@ -1,0 +1,115 @@
+<div class="property-view-container">
+  <div class="header-section">
+    <a routerLink="/properties/available" class="back-link">
+      <i class="fa fa-arrow-left"></i> Back to Available Properties
+    </a>
+    <h1>Property Details</h1>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading property details...</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && property" class="property-content">
+    <div class="property-header">
+      <h1>{{ property.title }}</h1>
+      <div class="property-status" [ngClass]="{'available': property.isAvailable, 'unavailable': !property.isAvailable}">
+        {{ property.isAvailable ? 'Available' : 'Not Available' }}
+      </div>
+    </div>
+
+    <div class="property-gallery">
+      <div *ngIf="property.images && property.images.length > 0" class="property-image">
+        <img [src]="property.images[0]" alt="{{ property.title }}">
+      </div>
+      <div *ngIf="!property.images || property.images.length === 0" class="property-image no-image">
+        <div class="no-image-placeholder">
+          <i class="fa fa-home"></i>
+          <p>No images available</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="property-details">
+      <div class="property-section">
+        <h2>Property Details</h2>
+
+        <div class="property-address">
+          <h3>Address</h3>
+          <p>
+            {{ property.address }}, {{ property.city }}, {{ property.state }} {{ property.zipCode }}
+          </p>
+        </div>
+
+        <div class="property-specs">
+          <div class="spec-item">
+            <div class="spec-label">Property Type</div>
+            <div class="spec-value">{{ property.propertyType | titlecase }}</div>
+          </div>
+
+          <div class="spec-item">
+            <div class="spec-label">Bedrooms</div>
+            <div class="spec-value">{{ property.bedrooms }}</div>
+          </div>
+
+          <div class="spec-item">
+            <div class="spec-label">Bathrooms</div>
+            <div class="spec-value">{{ property.bathrooms }}</div>
+          </div>
+
+          <div class="spec-item">
+            <div class="spec-label">Area</div>
+            <div class="spec-value">{{ property.area }} sqft</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="property-section">
+        <h2>Description</h2>
+        <p class="property-description">{{ property.description }}</p>
+      </div>
+
+      <div class="property-section">
+        <h2>Rental Information</h2>
+
+        <div class="rental-info">
+          <div class="info-item">
+            <div class="info-label">Monthly Rent</div>
+            <div class="info-value">${{ property.rentAmount }}</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">Security Deposit</div>
+            <div class="info-value">${{ property.securityDeposit }}</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">Available From</div>
+            <div class="info-value">{{ property.availableFrom | date:'mediumDate' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="property.amenities && property.amenities.length > 0" class="property-section">
+        <h2>Amenities</h2>
+        <ul class="amenities-list">
+          <li *ngFor="let amenity of property.amenities">{{ amenity }}</li>
+        </ul>
+      </div>
+
+      <div class="property-actions">
+        <button *ngIf="property.isAvailable && isLoggedIn && isTenant"
+                class="btn-apply"
+                (click)="applyForProperty()">
+          Apply for Rental
+        </button>
+        <button class="btn-back" (click)="goBack()">Back to Listings</button>
+      </div>
+    </div>
+  </div>
+</div>

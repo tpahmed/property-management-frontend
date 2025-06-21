@@ -1,0 +1,186 @@
+<div class="property-detail-container">
+  <div class="header-section">
+    <a routerLink="/properties" class="back-link">
+      <i class="fa fa-arrow-left"></i> Back to Properties
+    </a>
+    <h1>{{ isNewProperty ? 'Add New Property' : 'Edit Property' }}</h1>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading property details...</p>
+  </div>
+
+  <div *ngIf="!isLoading" class="property-form-container">
+    <form [formGroup]="propertyForm" (ngSubmit)="onSubmit()">
+      <div class="form-section">
+        <h2>Basic Information</h2>
+
+        <div class="form-group">
+          <label for="title">Property Title</label>
+          <input type="text" id="title" formControlName="title" placeholder="Enter property title">
+          <div *ngIf="propertyForm.get('title')?.invalid && propertyForm.get('title')?.touched" class="error-message">
+            <span *ngIf="propertyForm.get('title')?.errors?.['required']">Title is required</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea id="description" formControlName="description" rows="4" placeholder="Enter property description"></textarea>
+          <div *ngIf="propertyForm.get('description')?.invalid && propertyForm.get('description')?.touched" class="error-message">
+            <span *ngIf="propertyForm.get('description')?.errors?.['required']">Description is required</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="propertyType">Property Type</label>
+          <select id="propertyType" formControlName="propertyType">
+            <option *ngFor="let type of propertyTypes" [value]="type.value">{{ type.label }}</option>
+          </select>
+          <div *ngIf="propertyForm.get('propertyType')?.invalid && propertyForm.get('propertyType')?.touched" class="error-message">
+            <span *ngIf="propertyForm.get('propertyType')?.errors?.['required']">Property type is required</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h2>Address</h2>
+
+        <div formGroupName="address">
+          <div class="form-group">
+            <label for="street">Street</label>
+            <input type="text" id="street" formControlName="street" placeholder="Enter street address">
+            <div *ngIf="propertyForm.get('address.street')?.invalid && propertyForm.get('address.street')?.touched" class="error-message">
+              <span *ngIf="propertyForm.get('address.street')?.errors?.['required']">Street is required</span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="city">City</label>
+              <input type="text" id="city" formControlName="city" placeholder="Enter city">
+              <div *ngIf="propertyForm.get('address.city')?.invalid && propertyForm.get('address.city')?.touched" class="error-message">
+                <span *ngIf="propertyForm.get('address.city')?.errors?.['required']">City is required</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="state">State</label>
+              <input type="text" id="state" formControlName="state" placeholder="Enter state">
+              <div *ngIf="propertyForm.get('address.state')?.invalid && propertyForm.get('address.state')?.touched" class="error-message">
+                <span *ngIf="propertyForm.get('address.state')?.errors?.['required']">State is required</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="zipCode">ZIP Code</label>
+              <input type="text" id="zipCode" formControlName="zipCode" placeholder="Enter ZIP code">
+              <div *ngIf="propertyForm.get('address.zipCode')?.invalid && propertyForm.get('address.zipCode')?.touched" class="error-message">
+                <span *ngIf="propertyForm.get('address.zipCode')?.errors?.['required']">ZIP code is required</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="country">Country</label>
+              <input type="text" id="country" formControlName="country" placeholder="Enter country">
+              <div *ngIf="propertyForm.get('address.country')?.invalid && propertyForm.get('address.country')?.touched" class="error-message">
+                <span *ngIf="propertyForm.get('address.country')?.errors?.['required']">Country is required</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h2>Property Details</h2>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="bedrooms">Bedrooms</label>
+            <input type="number" id="bedrooms" formControlName="bedrooms" min="0">
+            <div *ngIf="propertyForm.get('bedrooms')?.invalid && propertyForm.get('bedrooms')?.touched" class="error-message">
+              <span *ngIf="propertyForm.get('bedrooms')?.errors?.['required']">Number of bedrooms is required</span>
+              <span *ngIf="propertyForm.get('bedrooms')?.errors?.['min']">Must be a positive number</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="bathrooms">Bathrooms</label>
+            <input type="number" id="bathrooms" formControlName="bathrooms" min="0">
+            <div *ngIf="propertyForm.get('bathrooms')?.invalid && propertyForm.get('bathrooms')?.touched" class="error-message">
+              <span *ngIf="propertyForm.get('bathrooms')?.errors?.['required']">Number of bathrooms is required</span>
+              <span *ngIf="propertyForm.get('bathrooms')?.errors?.['min']">Must be a positive number</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="squareFeet">Square Feet</label>
+            <input type="number" id="squareFeet" formControlName="squareFeet" min="0">
+            <div *ngIf="propertyForm.get('squareFeet')?.invalid && propertyForm.get('squareFeet')?.touched" class="error-message">
+              <span *ngIf="propertyForm.get('squareFeet')?.errors?.['required']">Square footage is required</span>
+              <span *ngIf="propertyForm.get('squareFeet')?.errors?.['min']">Must be a positive number</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h2>Rental Information</h2>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="rentAmount">Monthly Rent ($)</label>
+            <input type="number" id="rentAmount" formControlName="rentAmount" min="0">
+            <div *ngIf="propertyForm.get('rentAmount')?.invalid && propertyForm.get('rentAmount')?.touched" class="error-message">
+              <span *ngIf="propertyForm.get('rentAmount')?.errors?.['required']">Monthly rent is required</span>
+              <span *ngIf="propertyForm.get('rentAmount')?.errors?.['min']">Must be a positive number</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="securityDeposit">Security Deposit ($)</label>
+            <input type="number" id="securityDeposit" formControlName="securityDeposit" min="0">
+            <div *ngIf="propertyForm.get('securityDeposit')?.invalid && propertyForm.get('securityDeposit')?.touched" class="error-message">
+              <span *ngIf="propertyForm.get('securityDeposit')?.errors?.['required']">Security deposit is required</span>
+              <span *ngIf="propertyForm.get('securityDeposit')?.errors?.['min']">Must be a positive number</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="availableDate">Available Date</label>
+            <input type="date" id="availableDate" formControlName="availableDate">
+            <div *ngIf="propertyForm.get('availableDate')?.invalid && propertyForm.get('availableDate')?.touched" class="error-message">
+              <span *ngIf="propertyForm.get('availableDate')?.errors?.['required']">Available date is required</span>
+            </div>
+          </div>
+
+          <div class="form-group checkbox-group">
+            <label>
+              <input type="checkbox" formControlName="isAvailable">
+              Property is available for rent
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="errorMessage" class="alert-error">
+        {{ errorMessage }}
+      </div>
+
+      <div class="form-actions">
+        <button type="button" routerLink="/properties" class="btn-secondary">Cancel</button>
+        <button
+          type="submit"
+          [disabled]="propertyForm.invalid || isSubmitting"
+          class="btn-primary"
+        >
+          {{ isSubmitting ? 'Saving...' : (isNewProperty ? 'Add Property' : 'Update Property') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

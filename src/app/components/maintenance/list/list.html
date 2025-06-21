@@ -1,0 +1,82 @@
+<div class="maintenance-list-container">
+  <div class="header-section">
+    <h1>Maintenance Requests</h1>
+    <div class="actions">
+      <a routerLink="/maintenance/new" class="btn-primary">New Maintenance Request</a>
+    </div>
+  </div>
+
+  <div class="filter-section">
+    <div class="filter-group">
+      <label for="status-filter">Status:</label>
+      <select id="status-filter" (change)="filterByStatus($event)">
+        <option value="all">All</option>
+        <option value="pending">Pending</option>
+        <option value="assigned">Assigned</option>
+        <option value="in_progress">In Progress</option>
+        <option value="completed">Completed</option>
+        <option value="canceled">Canceled</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="priority-filter">Priority:</label>
+      <select id="priority-filter" (change)="filterByPriority($event)">
+        <option value="all">All</option>
+        <option value="low">Low</option>
+        <option value="medium">Medium</option>
+        <option value="high">High</option>
+        <option value="emergency">Emergency</option>
+      </select>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading maintenance requests...</p>
+  </div>
+
+  <div *ngIf="!isLoading && filteredRequests.length === 0" class="empty-state">
+    <p>No maintenance requests found.</p>
+    <a routerLink="/maintenance/new" class="btn-primary">Create New Request</a>
+  </div>
+
+  <div *ngIf="!isLoading && filteredRequests.length > 0" class="maintenance-table-container">
+    <table class="maintenance-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>Property</th>
+          <th>Category</th>
+          <th>Priority</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let request of filteredRequests" [routerLink]="['/maintenance', request._id]">
+          <td>{{ request._id?.substring(0, 8) }}</td>
+          <td>{{ request.title }}</td>
+          <td>Property ID: {{ request.propertyId.substring(0, 8) }}</td>
+          <td>{{ request.category | titlecase }}</td>
+          <td>
+            <span [ngClass]="getPriorityClass(request.priority)">
+              {{ request.priority | titlecase }}
+            </span>
+          </td>
+          <td>
+            <span [ngClass]="getStatusClass(request.status)">
+              {{ request.status | titlecase }}
+            </span>
+          </td>
+          <td>{{ request.createdAt | date:'short' }}</td>
+          <td>
+            <button class="btn-view" [routerLink]="['/maintenance', request._id]">View</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

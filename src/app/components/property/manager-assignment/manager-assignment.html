@@ -1,0 +1,112 @@
+<div class="manager-assignment-container">
+  <div class="header-section">
+    <h1>Assign Property Managers</h1>
+    <p>Assign property managers to help you manage your properties.</p>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading properties...</p>
+  </div>
+
+  <div *ngIf="successMessage" class="alert-success">
+    {{ successMessage }}
+  </div>
+
+  <div *ngIf="errorMessage" class="alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && properties.length === 0" class="empty-state">
+    <div class="empty-icon">
+      <i class="fa fa-building-o"></i>
+    </div>
+    <h2>No Properties Found</h2>
+    <p>You don't have any properties registered in the system.</p>
+    <a routerLink="/properties/new" class="btn-primary">Add Your First Property</a>
+  </div>
+
+  <div *ngIf="!isLoading && properties.length > 0" class="assignment-content">
+    <div class="assignment-form">
+      <h2>Assign a New Manager</h2>
+
+      <div class="form-group">
+        <label for="propertySelect">Select Property</label>
+        <select id="propertySelect" [(ngModel)]="selectedPropertyId" required>
+          <option value="" disabled selected>Choose a property</option>
+          <option *ngFor="let property of properties" [value]="property._id">{{ property.title }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="managerSearch">Search for Manager</label>
+        <div class="search-container">
+          <input
+            type="text"
+            id="managerSearch"
+            [(ngModel)]="searchQuery"
+            (input)="onSearchChange(searchQuery)"
+            placeholder="Search by name or email"
+            required
+          >
+          <div *ngIf="isSearching" class="search-spinner"></div>
+        </div>
+        <small class="form-hint">Type at least 2 characters to search for property managers</small>
+
+        <div *ngIf="managers.length > 0" class="search-results">
+          <div
+            *ngFor="let manager of managers"
+            class="manager-result"
+            (click)="selectManager(manager)"
+          >
+            <div class="manager-name">{{ manager.firstName }} {{ manager.lastName }}</div>
+            <div class="manager-email">{{ manager.email }}</div>
+          </div>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="assignManager()"
+        [disabled]="!selectedPropertyId || !selectedManager"
+      >
+        Assign Manager
+      </button>
+    </div>
+
+    <div class="current-managers">
+      <h2>Current Property Managers</h2>
+
+      <div *ngIf="properties.length === 0" class="empty-managers">
+        <p>No properties available to display managers.</p>
+      </div>
+
+      <div class="manager-list">
+        <div *ngFor="let property of properties" class="property-manager-card">
+          <div class="property-info">
+            <h3>{{ property.title }}</h3>
+            <p class="property-address">{{ property.address }}</p>
+          </div>
+
+          <div class="manager-info">
+            <h4>Current Manager</h4>
+            <div *ngIf="property.managerId && property._id && currentManagers[property._id]" class="manager-details">
+              <p class="manager-email">{{ currentManagers[property._id || ''] }}</p>
+              <button
+                type="button"
+                class="btn-remove"
+                (click)="removeManager(property._id || '')"
+              >
+                Remove
+              </button>
+            </div>
+            <div *ngIf="!property.managerId" class="no-manager">
+              <p>No manager assigned</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

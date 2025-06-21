@@ -1,0 +1,40 @@
+<div class="available-rentals-container">
+  <div class="header-section">
+    <h1>Available Rentals</h1>
+    <p>Browse our available properties for rent</p>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading available properties...</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && properties.length === 0" class="no-properties">
+    <p>No available properties found at this time. Please check back later.</p>
+  </div>
+
+  <div class="property-grid" *ngIf="!isLoading && properties.length > 0">
+    <div class="property-card" *ngFor="let property of properties">
+      <div class="property-image" [style.background-image]="property.images && property.images.length > 0 ? 'url(' + property.images[0] + ')' : 'url(/assets/images/placeholder.jpg)'">
+        <div class="property-price">${{ property.rentAmount }}/month</div>
+      </div>
+      <div class="property-info">
+        <h2 class="property-title">{{ property.title }}</h2>
+        <p class="property-address">{{ property.address }}, {{ property.city }}, {{ property.state }}</p>
+        <div class="property-features">
+          <span class="feature"><i class="fa fa-bed"></i> {{ property.bedrooms }} beds</span>
+          <span class="feature"><i class="fa fa-bath"></i> {{ property.bathrooms }} baths</span>
+          <span class="feature"><i class="fa fa-ruler-combined"></i> {{ property.area }} sqft</span>
+        </div>
+        <p class="property-description">{{ property.description | slice:0:100 }}{{ property.description.length > 100 ? '...' : '' }}</p>
+        <div class="property-actions">
+          <a [routerLink]="['/properties', property._id, 'view']" class="btn-view">View Details</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

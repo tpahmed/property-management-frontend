@@ -1,0 +1,291 @@
+<div class="payment-detail-container">
+  <div class="header-section">
+    <a routerLink="/payments" class="back-link">
+      <i class="fa fa-arrow-left"></i> Back to Payments
+    </a>
+    <h1>{{ isNewPayment ? 'Make Payment' : 'Payment Details' }}</h1>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading payment details...</p>
+  </div>
+
+  <ng-container *ngIf="!isLoading">
+    <!-- New Payment Form -->
+    <div *ngIf="isNewPayment" class="payment-form-container">
+      <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()">
+        <div class="form-section">
+          <h2>Payment Information</h2>
+
+          <div class="form-group">
+            <label for="propertyId">Property</label>
+            <select id="propertyId" formControlName="propertyId">
+              <option value="">Select a property</option>
+              <!-- This would be populated with properties from an API call -->
+              <option *ngFor="let property of properties" [value]="property._id">{{ property.title }}</option>
+            </select>
+            <div *ngIf="paymentForm.get('propertyId')?.invalid && paymentForm.get('propertyId')?.touched" class="error-message">
+              <span *ngIf="paymentForm.get('propertyId')?.errors?.['required']">Property is required</span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="paymentType">Payment Type</label>
+              <select id="paymentType" formControlName="paymentType">
+                <option value="">Select payment type</option>
+                <option value="rent">Rent</option>
+                <option value="security_deposit">Security Deposit</option>
+                <option value="late_fee">Late Fee</option>
+                <option value="maintenance">Maintenance Fee</option>
+                <option value="other">Other</option>
+              </select>
+              <div *ngIf="paymentForm.get('paymentType')?.invalid && paymentForm.get('paymentType')?.touched" class="error-message">
+                <span *ngIf="paymentForm.get('paymentType')?.errors?.['required']">Payment type is required</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="amount">Amount ($)</label>
+              <input type="number" id="amount" formControlName="amount" min="0" step="0.01">
+              <div *ngIf="paymentForm.get('amount')?.invalid && paymentForm.get('amount')?.touched" class="error-message">
+                <span *ngIf="paymentForm.get('amount')?.errors?.['required']">Amount is required</span>
+                <span *ngIf="paymentForm.get('amount')?.errors?.['min']">Amount must be greater than 0</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" formControlName="description" rows="3" placeholder="Enter payment description"></textarea>
+            <div *ngIf="paymentForm.get('description')?.invalid && paymentForm.get('description')?.touched" class="error-message">
+              <span *ngIf="paymentForm.get('description')?.errors?.['required']">Description is required</span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="dueDate">Due Date</label>
+              <input type="date" id="dueDate" formControlName="dueDate">
+              <div *ngIf="paymentForm.get('dueDate')?.invalid && paymentForm.get('dueDate')?.touched" class="error-message">
+                <span *ngIf="paymentForm.get('dueDate')?.errors?.['required']">Due date is required</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h2>Payment Method</h2>
+
+          <div class="form-group">
+            <label for="paymentMethod">Select Payment Method</label>
+            <select id="paymentMethod" formControlName="paymentMethod">
+              <option value="">Select payment method</option>
+              <option value="credit_card">Credit Card</option>
+              <option value="bank_transfer">Bank Transfer</option>
+              <option value="paypal">PayPal</option>
+              <option value="other">Other</option>
+            </select>
+            <div *ngIf="paymentForm.get('paymentMethod')?.invalid && paymentForm.get('paymentMethod')?.touched" class="error-message">
+              <span *ngIf="paymentForm.get('paymentMethod')?.errors?.['required']">Payment method is required</span>
+            </div>
+          </div>
+
+          <ng-container [ngSwitch]="paymentForm.get('paymentMethod')?.value">
+            <div *ngSwitchCase="'credit_card'" class="credit-card-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="cardNumber">Card Number</label>
+                  <input type="text" id="cardNumber" placeholder="**** **** **** ****" formControlName="cardNumber">
+                  <div *ngIf="paymentForm.get('cardNumber')?.invalid && paymentForm.get('cardNumber')?.touched" class="error-message">
+                    <span *ngIf="paymentForm.get('cardNumber')?.errors?.['required']">Card number is required</span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="cardName">Name on Card</label>
+                  <input type="text" id="cardName" placeholder="John Doe" formControlName="cardName">
+                  <div *ngIf="paymentForm.get('cardName')?.invalid && paymentForm.get('cardName')?.touched" class="error-message">
+                    <span *ngIf="paymentForm.get('cardName')?.errors?.['required']">Name is required</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="expiryDate">Expiry Date</label>
+                  <input type="text" id="expiryDate" placeholder="MM/YY" formControlName="expiryDate">
+                  <div *ngIf="paymentForm.get('expiryDate')?.invalid && paymentForm.get('expiryDate')?.touched" class="error-message">
+                    <span *ngIf="paymentForm.get('expiryDate')?.errors?.['required']">Expiry date is required</span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="cvv">CVV</label>
+                  <input type="text" id="cvv" placeholder="123" formControlName="cvv">
+                  <div *ngIf="paymentForm.get('cvv')?.invalid && paymentForm.get('cvv')?.touched" class="error-message">
+                    <span *ngIf="paymentForm.get('cvv')?.errors?.['required']">CVV is required</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div *ngSwitchCase="'bank_transfer'" class="bank-transfer-form">
+              <div class="form-group">
+                <label for="accountName">Account Name</label>
+                <input type="text" id="accountName" formControlName="accountName">
+                <div *ngIf="paymentForm.get('accountName')?.invalid && paymentForm.get('accountName')?.touched" class="error-message">
+                  <span *ngIf="paymentForm.get('accountName')?.errors?.['required']">Account name is required</span>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="accountNumber">Account Number</label>
+                  <input type="text" id="accountNumber" formControlName="accountNumber">
+                  <div *ngIf="paymentForm.get('accountNumber')?.invalid && paymentForm.get('accountNumber')?.touched" class="error-message">
+                    <span *ngIf="paymentForm.get('accountNumber')?.errors?.['required']">Account number is required</span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="routingNumber">Routing Number</label>
+                  <input type="text" id="routingNumber" formControlName="routingNumber">
+                  <div *ngIf="paymentForm.get('routingNumber')?.invalid && paymentForm.get('routingNumber')?.touched" class="error-message">
+                    <span *ngIf="paymentForm.get('routingNumber')?.errors?.['required']">Routing number is required</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+
+        <div *ngIf="errorMessage" class="alert-error">
+          {{ errorMessage }}
+        </div>
+
+        <div class="form-actions">
+          <button type="button" routerLink="/payments" class="btn-secondary">Cancel</button>
+          <button
+            type="submit"
+            [disabled]="paymentForm.invalid || isSubmitting"
+            class="btn-primary"
+          >
+            {{ isSubmitting ? 'Processing...' : 'Make Payment' }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Existing Payment Details -->
+    <div *ngIf="!isNewPayment && payment" class="payment-detail-view">
+      <div class="detail-card">
+        <div class="detail-header">
+          <div class="status-badge" [ngClass]="getStatusClass(payment.status)">
+            {{ payment.status | titlecase }}
+          </div>
+          <div class="amount-badge">
+            {{ payment.amount | currency }}
+          </div>
+        </div>
+
+        <div class="detail-content">
+          <div class="detail-section">
+            <h3>Payment Information</h3>
+            <div class="detail-row">
+              <span class="detail-label">Payment ID:</span>
+              <span class="detail-value">{{ payment._id }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Property:</span>
+              <span class="detail-value">{{ payment.propertyId }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Payment Type:</span>
+              <span class="detail-value">{{ payment.paymentType | titlecase }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Description:</span>
+              <span class="detail-value">{{ payment.description }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Due Date:</span>
+              <span class="detail-value">{{ payment.dueDate | date:'mediumDate' }}</span>
+            </div>
+            <div class="detail-row" *ngIf="payment.paymentDate">
+              <span class="detail-label">Payment Date:</span>
+              <span class="detail-value">{{ payment.paymentDate | date:'medium' }}</span>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h3>Payment Method</h3>
+            <div class="detail-row">
+              <span class="detail-label">Method:</span>
+              <span class="detail-value">{{ payment.paymentMethod | titlecase }}</span>
+            </div>
+            <div class="detail-row" *ngIf="payment.paymentDetails?.cardNumber">
+              <span class="detail-label">Card Number:</span>
+              <span class="detail-value">**** **** **** {{ payment.paymentDetails?.cardNumber?.slice(-4) }}</span>
+            </div>
+            <div class="detail-row" *ngIf="payment.paymentDetails?.accountNumber">
+              <span class="detail-label">Account Number:</span>
+              <span class="detail-value">**** {{ payment.paymentDetails?.accountNumber?.slice(-4) }}</span>
+            </div>
+          </div>
+
+          <div class="detail-section" *ngIf="payment.transactionId">
+            <h3>Transaction Details</h3>
+            <div class="detail-row">
+              <span class="detail-label">Transaction ID:</span>
+              <span class="detail-value">{{ payment.transactionId }}</span>
+            </div>
+            <div class="detail-row" *ngIf="payment.processorResponse">
+              <span class="detail-label">Processor Response:</span>
+              <span class="detail-value">{{ payment.processorResponse }}</span>
+            </div>
+          </div>
+
+          <div class="detail-section" *ngIf="payment.status === 'failed' && payment.failureReason">
+            <h3>Failure Information</h3>
+            <div class="detail-row">
+              <span class="detail-label">Reason:</span>
+              <span class="detail-value">{{ payment.failureReason }}</span>
+            </div>
+          </div>
+
+          <div class="detail-section" *ngIf="payment.status === 'refunded' && payment.refundDetails">
+            <h3>Refund Information</h3>
+            <div class="detail-row">
+              <span class="detail-label">Refund Date:</span>
+              <span class="detail-value">{{ payment.refundDetails.date | date:'medium' }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Refund Amount:</span>
+              <span class="detail-value">{{ payment.refundDetails.amount | currency }}</span>
+            </div>
+            <div class="detail-row" *ngIf="payment.refundDetails.reason">
+              <span class="detail-label">Refund Reason:</span>
+              <span class="detail-value">{{ payment.refundDetails.reason }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-actions">
+          <ng-container [ngSwitch]="payment.status">
+            <ng-container *ngSwitchCase="'pending'">
+              <button class="btn-primary" (click)="processPayment()">Process Payment</button>
+              <button class="btn-secondary" (click)="cancelPayment()">Cancel Payment</button>
+            </ng-container>
+
+            <ng-container *ngSwitchCase="'completed'">
+              <button class="btn-secondary" *ngIf="canRefundPayment()" (click)="refundPayment()">Request Refund</button>
+              <button class="btn-primary" (click)="downloadReceipt()">Download Receipt</button>
+            </ng-container>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

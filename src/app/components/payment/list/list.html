@@ -1,0 +1,158 @@
+<div class="payment-list-container">
+  <div class="header-section">
+    <h1>Payments</h1>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading payments...</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Statistics Panel for Property Owners and Managers -->
+  <div *ngIf="!isLoading && !errorMessage && userRole !== 'tenant' && payments.length > 0" class="statistics-panel">
+    <div class="stat-card">
+      <div class="stat-title">Total Received</div>
+      <div class="stat-value">${{ formatCurrency(totalReceived) }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-title">Total Pending</div>
+      <div class="stat-value">${{ formatCurrency(totalPending) }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-title">Total Overdue</div>
+      <div class="stat-value">${{ formatCurrency(totalOverdue) }}</div>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && userRole !== 'tenant' && properties.length === 0" class="empty-state">
+    <div class="empty-icon">
+      <i class="fa fa-building-o"></i>
+    </div>
+    <h2>No Properties Found</h2>
+    <p>You don't have any properties registered in the system.</p>
+    <a routerLink="/properties/new" class="btn-primary">Add Your First Property</a>
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && filteredPayments.length === 0 && (userRole === 'tenant' || properties.length > 0)" class="empty-state">
+    <div class="empty-icon">
+      <i class="fa fa-credit-card"></i>
+    </div>
+    <h2>No Payments Found</h2>
+    <p *ngIf="userRole === 'tenant'">You haven't made any payments yet.</p>
+    <p *ngIf="userRole !== 'tenant'">There are no payments for your properties.</p>
+    <a *ngIf="userRole === 'tenant'" routerLink="/payments/new" class="btn-primary">Make a Payment</a>
+  </div>
+
+  <div *ngIf="!isLoading && filteredPayments.length > 0" class="payment-content">
+    <div class="filters-section">
+      <div class="filter-group">
+        <label for="statusFilter">Status:</label>
+        <select id="statusFilter" [(ngModel)]="statusFilter" (change)="applyFilters()">
+          <option value="all">All Statuses</option>
+          <option value="paid">Paid</option>
+          <option value="pending">Pending</option>
+          <option value="overdue">Overdue</option>
+          <option value="canceled">Canceled</option>
+        </select>
+      </div>
+
+      <div *ngIf="userRole !== 'tenant' && properties.length > 0" class="filter-group">
+        <label for="propertyFilter">Property:</label>
+        <select id="propertyFilter" [(ngModel)]="propertyFilter" (change)="applyFilters()">
+          <option value="all">All Properties</option>
+          <option *ngFor="let property of properties" [value]="property._id">{{ property.title }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="monthFilter">Month:</label>
+        <select id="monthFilter" [(ngModel)]="monthFilter" (change)="applyFilters()">
+          <option *ngFor="let month of months" [value]="month.value">{{ month.name }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="payment-list">
+      <div *ngFor="let payment of filteredPayments" class="payment-card">
+        <div class="payment-header">
+          <div class="payment-title">
+            <h2>{{ payment.description || 'Rent Payment' }}</h2>
+            <div [ngClass]="['payment-status', getStatusClass(payment.status)]">
+              {{ payment.status | titlecase }}
+            </div>
+          </div>
+          <div class="payment-amount">${{ formatCurrency(payment.amount) }}</div>
+        </div>
+
+        <div *ngIf="userRole !== 'tenant'" class="property-info">
+          <h3>Property Information</h3>
+          <div class="info-row">
+            <span class="label">Property:</span>
+            <span class="value">{{ payment.property?.title || 'Unknown Property' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Address:</span>
+            <span class="value">{{ payment.property?.address || 'Unknown Address' }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="userRole !== 'tenant'" class="tenant-info">
+          <h3>Tenant Information</h3>
+          <div class="info-row">
+            <span class="label">Tenant ID:</span>
+            <span class="value">{{ payment.tenantId }}</span>
+          </div>
+        </div>
+
+        <div class="payment-details">
+          <h3>Payment Details</h3>
+          <div class="info-row">
+            <span class="label">Payment Type:</span>
+            <span class="value">{{ payment.paymentType }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Due Date:</span>
+            <span class="value">{{ formatDate(payment.dueDate || '') }}</span>
+          </div>
+          <div class="info-row" *ngIf="payment.paidDate">
+            <span class="label">Paid Date:</span>
+            <span class="value">{{ formatDate(payment.paidDate || '') }}</span>
+          </div>
+          <div class="info-row" *ngIf="payment.paymentMethod">
+            <span class="label">Payment Method:</span>
+            <span class="value">{{ payment.paymentMethod }}</span>
+          </div>
+          <div class="info-row" *ngIf="payment.transactionId">
+            <span class="label">Transaction ID:</span>
+            <span class="value">{{ payment.transactionId }}</span>
+          </div>
+          <div class="info-row" *ngIf="payment.notes">
+            <span class="label">Notes:</span>
+            <span class="value">{{ payment.notes }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="payment.lateFee && payment.lateFee > 0" class="late-fee-info">
+          <h3>Late Fee</h3>
+          <div class="info-row">
+            <span class="label">Late Fee Amount:</span>
+            <span class="value">${{ formatCurrency(payment.lateFee) }}</span>
+          </div>
+        </div>
+
+        <div class="payment-actions">
+          <a [routerLink]="['/payments', payment._id]" class="btn-primary">View Details</a>
+          <button *ngIf="userRole === 'tenant' && payment.status === 'pending'"
+                  class="btn-pay"
+                  [routerLink]="['/payments/pay', payment._id]">
+            Pay Now
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

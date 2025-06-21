@@ -1,0 +1,197 @@
+.navbar {
+  background-color: #2c3e50;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+
+  .navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    height: 60px;
+  }
+
+  .navbar-brand {
+    a {
+      color: white;
+      font-size: 20px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: color 0.3s;
+
+      &:hover {
+        color: #3498db;
+      }
+    }
+  }
+
+  .menu-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+
+    .bar {
+      display: block;
+      width: 25px;
+      height: 3px;
+      background-color: white;
+      margin: 5px 0;
+      transition: all 0.3s ease;
+    }
+  }
+
+  .navbar-menu {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-grow: 1;
+    margin-left: 20px;
+  }
+
+  .navbar-links {
+    display: flex;
+    gap: 20px;
+
+    a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      font-size: 16px;
+      padding: 8px 0;
+      position: relative;
+      transition: color 0.3s;
+
+      &:hover, &.active {
+        color: white;
+      }
+
+      &.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background-color: #3498db;
+      }
+    }
+  }
+
+  .navbar-auth {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      font-size: 16px;
+      transition: color 0.3s;
+
+      &:hover, &.active {
+        color: white;
+      }
+    }
+
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .user-name {
+        color: white;
+        font-weight: 500;
+      }
+
+      .btn-logout {
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s;
+
+        &:hover {
+          background-color: #c0392b;
+        }
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    .menu-toggle {
+      display: block;
+    }
+
+    .navbar-menu {
+      position: absolute;
+      top: 60px;
+      left: 0;
+      right: 0;
+      background-color: #2c3e50;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 20px;
+      transform: translateY(-150%);
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      box-shadow: 0 5px 5px rgba(0, 0, 0, 0.2);
+
+      &.active {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .navbar-links {
+      flex-direction: column;
+      width: 100%;
+      margin-bottom: 20px;
+      gap: 10px;
+
+      a {
+        width: 100%;
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+        &.active::after {
+          display: none;
+        }
+      }
+    }
+
+    .navbar-auth {
+      width: 100%;
+      flex-direction: column;
+      gap: 10px;
+
+      a {
+        width: 100%;
+        padding: 10px 0;
+        text-align: center;
+      }
+
+      .user-menu {
+        width: 100%;
+        flex-direction: column;
+
+        .user-name {
+          margin-bottom: 10px;
+        }
+
+        .btn-logout {
+          width: 100%;
+          padding: 10px;
+        }
+      }
+    }
+  }
+}

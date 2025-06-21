@@ -1,0 +1,68 @@
+<div class="my-applications-container">
+  <div class="header-section">
+    <h1>My Rental Applications</h1>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading your applications...</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && applications.length === 0" class="no-applications">
+    <p>You haven't submitted any rental applications yet.</p>
+    <a routerLink="/available-rentals" class="btn-primary">Browse Available Properties</a>
+  </div>
+
+  <div class="applications-list" *ngIf="!isLoading && applications.length > 0">
+    <div class="application-card" *ngFor="let application of applications">
+      <div class="application-status" [ngClass]="getStatusClass(application.status)">
+        {{ application.status | titlecase }}
+      </div>
+
+      <div class="application-content">
+        <div class="application-header">
+          <h2>Application #{{ application._id }}</h2>
+          <p class="application-date">Submitted on {{ formatDate(application.createdAt || '') }}</p>
+        </div>
+
+        <div *ngIf="application.property" class="property-summary">
+          <div class="property-image" [style.background-image]="getPropertyImageUrl(application)">
+          </div>
+          <div class="property-info">
+            <h3 class="property-title">{{ application.property.title }}</h3>
+            <p class="property-address">{{ getPropertyAddress(application) }}</p>
+            <div class="property-features">
+              <span class="feature"><i class="fa fa-bed"></i> {{ application.property.bedrooms }} beds</span>
+              <span class="feature"><i class="fa fa-bath"></i> {{ application.property.bathrooms }} baths</span>
+              <span class="feature"><i class="fa fa-ruler-combined"></i> {{ getPropertyArea(application) }} sqft</span>
+            </div>
+            <p class="property-rent">${{ application.property.rentAmount }}/month</p>
+          </div>
+        </div>
+
+        <div class="application-details">
+          <div class="detail-row">
+            <span class="label">Move-in Date:</span>
+            <span class="value">{{ formatDate(application.moveInDate) }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Lease Term:</span>
+            <span class="value">{{ application.leaseTerm }} months</span>
+          </div>
+          <div class="detail-row" *ngIf="application.rejectionReason">
+            <span class="label">Rejection Reason:</span>
+            <span class="value">{{ application.rejectionReason }}</span>
+          </div>
+        </div>
+
+        <div class="application-actions" *ngIf="application.status === 'pending'">
+          <button class="btn-cancel" (click)="cancelApplication(application._id || '')">Cancel Application</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

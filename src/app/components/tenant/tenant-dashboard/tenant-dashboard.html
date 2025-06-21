@@ -1,0 +1,114 @@
+<div class="tenant-dashboard-container">
+  <div class="dashboard-header">
+    <h1>Tenant Dashboard</h1>
+    <p *ngIf="currentUserName">Welcome, {{ currentUserName }}</p>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading your dashboard...</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading" class="dashboard-content">
+    <!-- Active Leases Section -->
+    <section class="dashboard-section">
+      <div class="section-header">
+        <h2>My Active Leases</h2>
+        <a routerLink="/my-leases" class="view-all">View All</a>
+      </div>
+
+      <div *ngIf="getActiveLeases().length === 0" class="empty-section">
+        <p>You don't have any active leases.</p>
+        <a routerLink="/available-rentals" class="btn-primary">Browse Available Properties</a>
+      </div>
+
+      <div class="leases-list" *ngIf="getActiveLeases().length > 0">
+        <div class="lease-card" *ngFor="let lease of getActiveLeases()">
+          <div *ngIf="lease.property" class="property-summary">
+            <div class="property-image" [style.background-image]="getPropertyImageUrl(lease)">
+            </div>
+            <div class="property-info">
+              <h3 class="property-title">{{ lease.property.title }}</h3>
+              <p class="property-address">{{ getPropertyAddress(lease) }}</p>
+              <div class="lease-details">
+                <div class="detail-row">
+                  <span class="label">Rent:</span>
+                  <span class="value">${{ lease.rentAmount }}/month</span>
+                </div>
+                <div class="detail-row">
+                  <span class="label">Due Date:</span>
+                  <span class="value">{{ lease.paymentDueDay }}{{ lease.paymentDueDay === 1 ? 'st' : lease.paymentDueDay === 2 ? 'nd' : lease.paymentDueDay === 3 ? 'rd' : 'th' }} of each month</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recent Applications Section -->
+    <section class="dashboard-section">
+      <div class="section-header">
+        <h2>My Recent Applications</h2>
+        <a routerLink="/my-applications" class="view-all">View All</a>
+      </div>
+
+      <div *ngIf="applications.length === 0" class="empty-section">
+        <p>You haven't submitted any applications yet.</p>
+        <a routerLink="/available-rentals" class="btn-primary">Browse Available Properties</a>
+      </div>
+
+      <div class="applications-list" *ngIf="applications.length > 0">
+        <div class="application-card" *ngFor="let application of getRecentApplications()">
+          <div class="application-status" [ngClass]="getStatusClass(application.status)">
+            {{ application.status | titlecase }}
+          </div>
+
+          <div *ngIf="application.property" class="property-summary">
+            <div class="property-image" [style.background-image]="getPropertyImageUrl(application)">
+            </div>
+            <div class="property-info">
+              <h3 class="property-title">{{ application.property.title }}</h3>
+              <p class="property-address">{{ getPropertyAddress(application) }}</p>
+              <p class="application-date">Applied on: {{ formatDate(application.createdAt || '') }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Links Section -->
+    <section class="dashboard-section">
+      <div class="section-header">
+        <h2>Quick Links</h2>
+      </div>
+
+      <div class="quick-links">
+        <a routerLink="/available-rentals" class="quick-link">
+          <i class="fa fa-home"></i>
+          <span>Browse Properties</span>
+        </a>
+        <a routerLink="/my-applications" class="quick-link">
+          <i class="fa fa-file-text"></i>
+          <span>My Applications</span>
+        </a>
+        <a routerLink="/my-leases" class="quick-link">
+          <i class="fa fa-file-contract"></i>
+          <span>My Leases</span>
+        </a>
+        <a routerLink="/maintenance/new" class="quick-link">
+          <i class="fa fa-tools"></i>
+          <span>Request Maintenance</span>
+        </a>
+        <a routerLink="/payments/new" class="quick-link">
+          <i class="fa fa-credit-card"></i>
+          <span>Make a Payment</span>
+        </a>
+      </div>
+    </section>
+  </div>
+</div>

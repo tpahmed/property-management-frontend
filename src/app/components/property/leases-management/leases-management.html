@@ -1,0 +1,171 @@
+<div class="leases-management-container">
+  <div class="header-section">
+    <h1>Lease Management</h1>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading leases...</p>
+  </div>
+
+  <div *ngIf="successMessage" class="alert-success">
+    {{ successMessage }}
+  </div>
+
+  <div *ngIf="errorMessage" class="alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && properties.length === 0" class="empty-state">
+    <div class="empty-icon">
+      <i class="fa fa-building-o"></i>
+    </div>
+    <h2>No Properties Found</h2>
+    <p>You don't have any properties registered in the system.</p>
+    <a routerLink="/properties/new" class="btn-primary">Add Your First Property</a>
+  </div>
+
+  <div *ngIf="!isLoading && properties.length > 0" class="leases-content">
+    <div class="filters-section">
+      <div class="filter-group">
+        <label for="statusFilter">Status:</label>
+        <select id="statusFilter" [(ngModel)]="statusFilter" (change)="applyFilters()">
+          <option value="all">All Statuses</option>
+          <option value="active">Active</option>
+          <option value="future">Future</option>
+          <option value="expired">Expired</option>
+          <option value="termination requested">Termination Requested</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="propertyFilter">Property:</label>
+        <select id="propertyFilter" [(ngModel)]="propertyFilter" (change)="applyFilters()">
+          <option value="all">All Properties</option>
+          <option *ngFor="let property of properties" [value]="property._id">{{ property.title }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div *ngIf="filteredLeases.length === 0" class="empty-state">
+      <p>No leases match your filters.</p>
+    </div>
+
+    <div *ngIf="filteredLeases.length > 0" class="leases-list">
+      <div *ngFor="let lease of filteredLeases" class="lease-card">
+        <div class="lease-header">
+          <h2>{{ lease.property?.title || 'Property Lease' }}</h2>
+          <div [ngClass]="['lease-status', getStatusClass(lease)]">
+            {{ getLeaseStatus(lease) }}
+          </div>
+        </div>
+
+        <div class="tenant-info">
+          <h3>Tenant Information</h3>
+          <div class="info-row">
+            <span class="label">Tenant ID:</span>
+            <span class="value">{{ lease.tenantId }}</span>
+          </div>
+        </div>
+
+        <div class="lease-details">
+          <h3>Lease Details</h3>
+          <div class="info-row">
+            <span class="label">Lease Period:</span>
+            <span class="value">{{ formatDate(lease.startDate) }} to {{ formatDate(lease.endDate) }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Monthly Rent:</span>
+            <span class="value">${{ lease.rentAmount }}/month</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Security Deposit:</span>
+            <span class="value">${{ lease.securityDeposit }}</span>
+          </div>
+          <div class="info-row" *ngIf="getLeaseStatus(lease) === 'Active'">
+            <span class="label">Days Remaining:</span>
+            <span class="value">{{ getRemainingDays(lease.endDate) }} days</span>
+          </div>
+          <div class="info-row" *ngIf="lease.paymentDueDay">
+            <span class="label">Payment Due Day:</span>
+            <span class="value">{{ lease.paymentDueDay }}{{ getDayOrdinal(lease.paymentDueDay) }} of each month</span>
+          </div>
+        </div>
+
+        <div *ngIf="lease.lateFeesApplicable" class="late-fees">
+          <h3>Late Fee Policy</h3>
+          <div class="info-row">
+            <span class="label">Late Fee Amount:</span>
+            <span class="value">${{ lease.lateFeeAmount }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Applied After:</span>
+            <span class="value">{{ lease.lateFeeApplicableAfterDays }} days</span>
+          </div>
+        </div>
+
+        <div *ngIf="lease.terminationRequested && lease.terminationDetails" class="termination-details">
+          <h3>Termination Request</h3>
+          <div class="info-row">
+            <span class="label">Requested By:</span>
+            <span class="value">{{ lease.terminationDetails.requestedBy }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Request Date:</span>
+            <span class="value">{{ formatDate(lease.terminationDetails.requestDate || '') }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Reason:</span>
+            <span class="value">{{ lease.terminationDetails.reason }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Requested Move-out:</span>
+            <span class="value">{{ formatDate(lease.terminationDetails.moveOutDate || '') }}</span>
+          </div>
+        </div>
+
+        <!-- Actions for termination requests -->
+        <div *ngIf="lease.terminationRequested && !lease.terminationDetails?.approvedBy" class="lease-actions">
+          <button class="btn-primary" (click)="showTerminationResponseForm(lease._id || '')">Respond to Termination</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Termination Response Form Modal -->
+    <div *ngIf="selectedLeaseId" class="modal-overlay">
+      <div class="modal-content">
+        <h3>Respond to Termination Request</h3>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="terminationApproved">
+            Approve Termination Request
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label for="terminationResponse">Response Comments</label>
+          <textarea
+            id="terminationResponse"
+            [(ngModel)]="terminationResponse"
+            rows="4"
+            placeholder="Enter your response to the termination request..."
+          ></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" (click)="cancelTerminationResponse()" class="btn-secondary">Cancel</button>
+          <button
+            type="button"
+            (click)="submitTerminationResponse()"
+            [disabled]="!terminationResponse.trim()"
+            class="btn-primary"
+          >
+            Submit Response
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

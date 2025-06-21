@@ -1,0 +1,164 @@
+<div class="applications-management-container">
+  <div class="header-section">
+    <h1>Rental Applications Management</h1>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading applications...</p>
+  </div>
+
+  <div *ngIf="successMessage" class="alert-success">
+    {{ successMessage }}
+  </div>
+
+  <div *ngIf="errorMessage" class="alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && properties.length === 0" class="empty-state">
+    <div class="empty-icon">
+      <i class="fa fa-building-o"></i>
+    </div>
+    <h2>No Properties Found</h2>
+    <p>You don't have any properties registered in the system.</p>
+    <a routerLink="/properties/new" class="btn-primary">Add Your First Property</a>
+  </div>
+
+  <div *ngIf="!isLoading && properties.length > 0" class="applications-content">
+    <div class="filters-section">
+      <div class="filter-group">
+        <label for="statusFilter">Status:</label>
+        <select id="statusFilter" [(ngModel)]="statusFilter" (change)="applyFilters()">
+          <option value="all">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+          <option value="canceled">Canceled</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="propertyFilter">Property:</label>
+        <select id="propertyFilter" [(ngModel)]="propertyFilter" (change)="applyFilters()">
+          <option value="all">All Properties</option>
+          <option *ngFor="let property of properties" [value]="property._id">{{ property.title }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div *ngIf="filteredApplications.length === 0" class="empty-state">
+      <p>No applications match your filters.</p>
+    </div>
+
+    <div *ngIf="filteredApplications.length > 0" class="applications-list">
+      <div *ngFor="let application of filteredApplications" class="application-card">
+        <div class="application-header">
+          <h2>{{ application.property?.title || 'Property Application' }}</h2>
+          <div [ngClass]="['application-status', getStatusClass(application.status)]">
+            {{ application.status | titlecase }}
+          </div>
+        </div>
+
+        <div class="applicant-info">
+          <h3>Applicant Information</h3>
+          <div class="info-row">
+            <span class="label">Tenant ID:</span>
+            <span class="value">{{ application.tenantId }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Application Date:</span>
+            <span class="value">{{ formatDate(application.createdAt || '') }}</span>
+          </div>
+        </div>
+
+        <div class="application-details">
+          <h3>Application Details</h3>
+          <div class="info-row">
+            <span class="label">Desired Move-in Date:</span>
+            <span class="value">{{ formatDate(application.moveInDate) }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Lease Term:</span>
+            <span class="value">{{ application.leaseTerm }} months</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Credit Score:</span>
+            <span class="value">{{ application.creditScore || 'Not provided' }}</span>
+          </div>
+        </div>
+
+        <div class="employment-info">
+          <h3>Employment Information</h3>
+          <div class="info-row">
+            <span class="label">Employer:</span>
+            <span class="value">{{ application.employmentInfo.employer }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Position:</span>
+            <span class="value">{{ application.employmentInfo.position }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Monthly Income:</span>
+            <span class="value">${{ application.employmentInfo.monthlyIncome }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Employment Length:</span>
+            <span class="value">{{ application.employmentInfo.employmentLength }} months</span>
+          </div>
+        </div>
+
+        <div *ngIf="application.additionalNotes" class="additional-notes">
+          <h3>Additional Notes</h3>
+          <p>{{ application.additionalNotes }}</p>
+        </div>
+
+        <div *ngIf="application.status === 'rejected' && application.rejectionReason" class="rejection-reason">
+          <h3>Rejection Reason</h3>
+          <p>{{ application.rejectionReason }}</p>
+        </div>
+
+        <!-- Actions for pending applications -->
+        <div *ngIf="application.status === 'pending'" class="application-actions">
+          <button class="btn-approve" (click)="approveApplication(application._id || '')">Approve</button>
+          <button class="btn-reject" (click)="showRejectForm(application._id || '')">Reject</button>
+        </div>
+
+        <!-- Actions for approved applications -->
+        <div *ngIf="application.status === 'approved'" class="application-actions">
+          <button class="btn-primary" (click)="createLease(application)">Create Lease</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rejection Form Modal -->
+    <div *ngIf="selectedApplicationId" class="modal-overlay">
+      <div class="modal-content">
+        <h3>Reject Application</h3>
+        <p>Please provide a reason for rejecting this application:</p>
+
+        <div class="form-group">
+          <label for="rejectionReason">Reason for Rejection</label>
+          <textarea
+            id="rejectionReason"
+            [(ngModel)]="rejectionReason"
+            rows="4"
+            placeholder="Enter reason for rejection..."
+          ></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" (click)="cancelRejection()" class="btn-secondary">Cancel</button>
+          <button
+            type="button"
+            (click)="rejectApplication()"
+            [disabled]="!rejectionReason.trim()"
+            class="btn-primary"
+          >
+            Submit Rejection
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

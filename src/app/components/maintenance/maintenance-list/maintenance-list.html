@@ -1,0 +1,148 @@
+<div class="maintenance-list-container">
+  <div class="header-section">
+    <h1>Maintenance Requests</h1>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading maintenance requests...</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && filteredRequests.length === 0 && userRole !== 'tenant' && properties.length === 0" class="empty-state">
+    <div class="empty-icon">
+      <i class="fa fa-building-o"></i>
+    </div>
+    <h2>No Properties Found</h2>
+    <p>You don't have any properties registered in the system.</p>
+    <a routerLink="/properties/new" class="btn-primary">Add Your First Property</a>
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && filteredRequests.length === 0 && (userRole === 'tenant' || properties.length > 0)" class="empty-state">
+    <div class="empty-icon">
+      <i class="fa fa-wrench"></i>
+    </div>
+    <h2>No Maintenance Requests</h2>
+    <p *ngIf="userRole === 'tenant'">You haven't submitted any maintenance requests yet.</p>
+    <p *ngIf="userRole !== 'tenant'">There are no maintenance requests for your properties.</p>
+    <a *ngIf="userRole === 'tenant'" routerLink="/maintenance/new" class="btn-primary">Submit a Request</a>
+  </div>
+
+  <div *ngIf="!isLoading && filteredRequests.length > 0" class="maintenance-content">
+    <div class="filters-section">
+      <div class="filter-group">
+        <label for="statusFilter">Status:</label>
+        <select id="statusFilter" [(ngModel)]="statusFilter" (change)="applyFilters()">
+          <option value="all">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="in_progress">In Progress</option>
+          <option value="completed">Completed</option>
+          <option value="canceled">Canceled</option>
+        </select>
+      </div>
+
+      <div *ngIf="userRole !== 'tenant' && properties.length > 0" class="filter-group">
+        <label for="propertyFilter">Property:</label>
+        <select id="propertyFilter" [(ngModel)]="propertyFilter" (change)="applyFilters()">
+          <option value="all">All Properties</option>
+          <option *ngFor="let property of properties" [value]="property._id">{{ property.title }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="maintenance-list">
+      <div *ngFor="let request of filteredRequests" class="maintenance-card">
+        <div class="maintenance-header">
+          <div class="maintenance-title">
+            <h2>{{ request.title }}</h2>
+            <div [ngClass]="['maintenance-status', getStatusClass(request.status)]">
+              {{ request.status === 'in_progress' ? 'In Progress' : (request.status | titlecase) }}
+            </div>
+          </div>
+          <div [ngClass]="['maintenance-priority', getPriorityClass(request.priority)]">
+            {{ request.priority | titlecase }} Priority
+          </div>
+        </div>
+
+        <div *ngIf="userRole !== 'tenant'" class="property-info">
+          <h3>Property Information</h3>
+          <div class="info-row">
+            <span class="label">Property:</span>
+            <span class="value">{{ request.property?.title || 'Unknown Property' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Address:</span>
+            <span class="value">{{ request.property?.address || 'Unknown Address' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Unit:</span>
+            <span class="value">{{ request.unit || 'N/A' }}</span>
+          </div>
+        </div>
+
+        <div class="tenant-info" *ngIf="userRole !== 'tenant'">
+          <h3>Tenant Information</h3>
+          <div class="info-row">
+            <span class="label">Tenant ID:</span>
+            <span class="value">{{ request.tenantId }}</span>
+          </div>
+        </div>
+
+        <div class="request-details">
+          <h3>Request Details</h3>
+          <div class="info-row">
+            <span class="label">Submitted:</span>
+            <span class="value">{{ formatDate(request.createdAt || '') }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Category:</span>
+            <span class="value">{{ request.category }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Description:</span>
+            <span class="value description-text">{{ request.description }}</span>
+          </div>
+          <div *ngIf="request.permissionToEnter !== undefined" class="info-row">
+            <span class="label">Permission to Enter:</span>
+            <span class="value">{{ request.permissionToEnter ? 'Yes' : 'No' }}</span>
+          </div>
+          <div *ngIf="request.availableTimes" class="info-row">
+            <span class="label">Available Times:</span>
+            <span class="value">{{ request.availableTimes }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="request.status === 'in_progress' || request.status === 'completed'" class="maintenance-updates">
+          <h3>Maintenance Updates</h3>
+          <div *ngIf="request.assignedTo" class="info-row">
+            <span class="label">Assigned To:</span>
+            <span class="value">{{ request.assignedTo }}</span>
+          </div>
+          <div *ngIf="request.scheduledDate" class="info-row">
+            <span class="label">Scheduled Date:</span>
+            <span class="value">{{ formatDate(request.scheduledDate) }}</span>
+          </div>
+          <div *ngIf="request.completedDate && request.status === 'completed'" class="info-row">
+            <span class="label">Completed Date:</span>
+            <span class="value">{{ formatDate(request.completedDate) }}</span>
+          </div>
+          <div *ngIf="request.notes" class="info-row">
+            <span class="label">Notes:</span>
+            <span class="value description-text">{{ request.notes }}</span>
+          </div>
+          <div *ngIf="request.cost && request.status === 'completed'" class="info-row">
+            <span class="label">Cost:</span>
+            <span class="value">${{ request.cost.toFixed(2) }}</span>
+          </div>
+        </div>
+
+        <div class="maintenance-actions">
+          <a [routerLink]="['/maintenance', request._id]" class="btn-primary">View Details</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

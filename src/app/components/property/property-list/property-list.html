@@ -1,0 +1,48 @@
+<div class="property-list-container">
+  <div class="header-section">
+    <h1>My Properties</h1>
+    <div class="actions">
+      <button class="btn-add" routerLink="/properties/new">
+        <i class="fa fa-plus"></i> Add New Property
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading properties...</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && properties.length === 0" class="no-properties">
+    <p>You don't have any properties yet. Add your first property to get started.</p>
+    <button class="btn-add" routerLink="/properties/new">Add Property</button>
+  </div>
+
+  <div class="property-grid" *ngIf="!isLoading && properties.length > 0">
+    <div class="property-card" *ngFor="let property of properties">
+      <div class="property-image" [style.background-image]="getPropertyImageUrl(property)">
+        <div class="property-status" [ngClass]="{'available': property.isAvailable, 'unavailable': !property.isAvailable}">
+          {{ property.isAvailable ? 'Available' : 'Unavailable' }}
+        </div>
+      </div>
+      <div class="property-info">
+        <h2 class="property-title">{{ property.title }}</h2>
+        <p class="property-address">{{ getPropertyAddress(property) }}</p>
+        <div class="property-features">
+          <span class="feature"><i class="fa fa-bed"></i> {{ property.bedrooms }} beds</span>
+          <span class="feature"><i class="fa fa-bath"></i> {{ property.bathrooms }} baths</span>
+          <span class="feature"><i class="fa fa-ruler-combined"></i> {{ getPropertyArea(property) }} sqft</span>
+        </div>
+        <p class="property-rent">${{ property.rentAmount }}/month</p>
+        <div class="property-actions">
+          <a [routerLink]="['/properties', property._id, 'edit']" class="btn-edit">Edit</a>
+          <a [routerLink]="['/properties', property._id, 'view']" class="btn-view">View</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

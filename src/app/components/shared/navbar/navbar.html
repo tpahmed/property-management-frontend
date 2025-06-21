@@ -1,0 +1,62 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    <div class="navbar-brand">
+      <a routerLink="/">Property Management System</a>
+    </div>
+
+    <button class="menu-toggle" (click)="toggleMenu()" *ngIf="currentUser">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+
+    <div class="navbar-menu" [class.active]="isMenuOpen">
+      <div *ngIf="currentUser" class="navbar-links">
+        <!-- Common links for all users -->
+        <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMenu()">Dashboard</a>
+
+        <!-- Property Owner & Manager links -->
+        <ng-container *ngIf="isPropertyStaff()">
+          <a routerLink="/properties" routerLinkActive="active" (click)="closeMenu()">Properties</a>
+          <a routerLink="/applications" routerLinkActive="active" (click)="closeMenu()">Applications</a>
+          <a routerLink="/leases" routerLinkActive="active" (click)="closeMenu()">Leases</a>
+        </ng-container>
+
+        <!-- Property Owner specific links -->
+        <ng-container *ngIf="isPropertyOwner()">
+          <a routerLink="/managers" routerLinkActive="active" (click)="closeMenu()">Manage Managers</a>
+        </ng-container>
+
+        <!-- Tenant links -->
+        <ng-container *ngIf="isTenant()">
+          <a routerLink="/available-rentals" routerLinkActive="active" (click)="closeMenu()">Available Rentals</a>
+          <a routerLink="/my-applications" routerLinkActive="active" (click)="closeMenu()">My Applications</a>
+          <a routerLink="/my-leases" routerLinkActive="active" (click)="closeMenu()">My Leases</a>
+          <a routerLink="/tenant-dashboard" routerLinkActive="active" (click)="closeMenu()">Tenant Dashboard</a>
+        </ng-container>
+
+        <!-- Common links for all users -->
+        <a routerLink="/maintenance" routerLinkActive="active" (click)="closeMenu()">Maintenance</a>
+        <a routerLink="/payments" routerLinkActive="active" (click)="closeMenu()">Payments</a>
+      </div>
+
+      <div class="navbar-auth">
+        <ng-container *ngIf="!currentUser">
+          <a routerLink="/login" routerLinkActive="active">Login</a>
+          <a routerLink="/register" routerLinkActive="active">Register</a>
+        </ng-container>
+
+        <div class="user-menu" *ngIf="isLoggedIn">
+          <div class="user-info" (click)="toggleUserDropdown()">
+            <span class="user-avatar">
+              <i class="fa fa-user"></i>
+            </span>
+            <span class="user-name">{{ getUserName() }}</span>
+            <i class="fa fa-chevron-down"></i>
+          </div>
+          <button class="btn-logout" (click)="logout()">Logout</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>

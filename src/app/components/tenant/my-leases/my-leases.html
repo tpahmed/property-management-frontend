@@ -1,0 +1,108 @@
+<div class="my-leases-container">
+  <div class="header-section">
+    <h1>My Leases</h1>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading your leases...</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="successMessage" class="success-message">
+    {{ successMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && leases.length === 0" class="no-leases">
+    <p>You don't have any active leases.</p>
+    <a routerLink="/available-rentals" class="btn-primary">Browse Available Properties</a>
+  </div>
+
+  <div class="leases-list" *ngIf="!isLoading && leases.length > 0">
+    <div class="lease-card" *ngFor="let lease of leases">
+      <div class="lease-status" [ngClass]="{'active': lease.isActive, 'inactive': !lease.isActive}">
+        {{ lease.isActive ? 'Active' : 'Inactive' }}
+      </div>
+
+      <div class="lease-content">
+        <div *ngIf="lease.property" class="property-summary">
+          <div class="property-image" [style.background-image]="getPropertyImageUrl(lease)">
+          </div>
+          <div class="property-info">
+            <h3 class="property-title">{{ lease.property.title }}</h3>
+            <p class="property-address">{{ getPropertyAddress(lease) }}</p>
+            <div class="property-features">
+              <span class="feature"><i class="fa fa-bed"></i> {{ lease.property.bedrooms }} beds</span>
+              <span class="feature"><i class="fa fa-bath"></i> {{ lease.property.bathrooms }} baths</span>
+              <span class="feature"><i class="fa fa-ruler-combined"></i> {{ getPropertyArea(lease) }} sqft</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="lease-details">
+          <div class="detail-row">
+            <span class="label">Lease Period:</span>
+            <span class="value">{{ formatDate(lease.startDate) }} to {{ formatDate(lease.endDate) }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Monthly Rent:</span>
+            <span class="value">${{ lease.rentAmount }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Security Deposit:</span>
+            <span class="value">${{ lease.securityDeposit }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Payment Due Day:</span>
+            <span class="value">{{ lease.paymentDueDay }}{{ lease.paymentDueDay === 1 ? 'st' : lease.paymentDueDay === 2 ? 'nd' : lease.paymentDueDay === 3 ? 'rd' : 'th' }} of each month</span>
+          </div>
+          <div class="detail-row" *ngIf="lease.terminationRequested">
+            <span class="label">Termination Requested:</span>
+            <span class="value">{{ formatDate(lease.terminationDetails?.requestDate || '') }}</span>
+          </div>
+        </div>
+
+        <div class="lease-actions" *ngIf="lease.isActive && !lease.terminationRequested">
+          <button class="btn-terminate" (click)="openTerminationModal(lease._id || '')">Request Termination</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Termination Request Modal -->
+  <div *ngIf="isModalOpen" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Request Lease Termination</h2>
+        <button class="btn-close" (click)="closeTerminationModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="terminationForm" (ngSubmit)="submitTerminationRequest()">
+          <div class="form-group">
+            <label for="reason">Reason for Termination</label>
+            <textarea id="reason" formControlName="reason" rows="4" placeholder="Please explain why you want to terminate your lease..."></textarea>
+            <div *ngIf="terminationForm.get('reason')?.invalid && terminationForm.get('reason')?.touched" class="error-text">
+              Reason is required
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="moveOutDate">Requested Move-out Date</label>
+            <input type="date" id="moveOutDate" formControlName="moveOutDate">
+            <div *ngIf="terminationForm.get('moveOutDate')?.invalid && terminationForm.get('moveOutDate')?.touched" class="error-text">
+              Move-out date is required
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn-cancel" (click)="closeTerminationModal()">Cancel</button>
+            <button type="submit" class="btn-submit" [disabled]="terminationForm.invalid || isSubmitting">
+              {{ isSubmitting ? 'Submitting...' : 'Submit Request' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

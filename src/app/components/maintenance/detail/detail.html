@@ -1,0 +1,212 @@
+<div class="maintenance-detail-container">
+  <div class="header-section">
+    <a routerLink="/maintenance" class="back-link">
+      <i class="fa fa-arrow-left"></i> Back to Maintenance Requests
+    </a>
+    <h1>{{ isNewRequest ? 'New Maintenance Request' : 'Maintenance Request Details' }}</h1>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading request details...</p>
+  </div>
+
+  <ng-container *ngIf="!isLoading">
+    <!-- New Maintenance Request Form -->
+    <div *ngIf="isNewRequest" class="maintenance-form-container">
+      <form [formGroup]="maintenanceForm" (ngSubmit)="onSubmit()">
+        <div class="form-section">
+          <h2>Request Information</h2>
+
+          <div class="form-group">
+            <label for="propertyId">Property</label>
+            <select id="propertyId" formControlName="propertyId">
+              <option value="">Select a property</option>
+              <!-- This would be populated with properties from an API call -->
+              <option value="property-1">Property 1</option>
+              <option value="property-2">Property 2</option>
+            </select>
+            <div *ngIf="maintenanceForm.get('propertyId')?.invalid && maintenanceForm.get('propertyId')?.touched" class="error-message">
+              <span *ngIf="maintenanceForm.get('propertyId')?.errors?.['required']">Property is required</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="title">Title</label>
+            <input type="text" id="title" formControlName="title" placeholder="Enter a title for the maintenance request">
+            <div *ngIf="maintenanceForm.get('title')?.invalid && maintenanceForm.get('title')?.touched" class="error-message">
+              <span *ngIf="maintenanceForm.get('title')?.errors?.['required']">Title is required</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" formControlName="description" rows="4" placeholder="Describe the issue in detail"></textarea>
+            <div *ngIf="maintenanceForm.get('description')?.invalid && maintenanceForm.get('description')?.touched" class="error-message">
+              <span *ngIf="maintenanceForm.get('description')?.errors?.['required']">Description is required</span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="category">Category</label>
+              <select id="category" formControlName="category">
+                <option value="">Select a category</option>
+                <option *ngFor="let cat of categories" [value]="cat.value">{{ cat.label }}</option>
+              </select>
+              <div *ngIf="maintenanceForm.get('category')?.invalid && maintenanceForm.get('category')?.touched" class="error-message">
+                <span *ngIf="maintenanceForm.get('category')?.errors?.['required']">Category is required</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="priority">Priority</label>
+              <select id="priority" formControlName="priority">
+                <option *ngFor="let pri of priorities" [value]="pri.value">{{ pri.label }}</option>
+              </select>
+              <div *ngIf="maintenanceForm.get('priority')?.invalid && maintenanceForm.get('priority')?.touched" class="error-message">
+                <span *ngIf="maintenanceForm.get('priority')?.errors?.['required']">Priority is required</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="preferredAvailability">Preferred Availability (Optional)</label>
+            <input type="text" id="preferredAvailability" formControlName="preferredAvailability" placeholder="e.g., Weekdays after 5pm">
+          </div>
+
+          <div class="form-group checkbox-group">
+            <label>
+              <input type="checkbox" formControlName="permissionToEnter">
+              Permission to enter when not present
+            </label>
+          </div>
+        </div>
+
+        <div *ngIf="errorMessage" class="alert-error">
+          {{ errorMessage }}
+        </div>
+
+        <div class="form-actions">
+          <button type="button" routerLink="/maintenance" class="btn-secondary">Cancel</button>
+          <button
+            type="submit"
+            [disabled]="maintenanceForm.invalid || isSubmitting"
+            class="btn-primary"
+          >
+            {{ isSubmitting ? 'Submitting...' : 'Submit Request' }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Existing Maintenance Request Details -->
+    <div *ngIf="!isNewRequest && maintenanceRequest" class="maintenance-detail-view">
+      <div class="detail-card">
+        <div class="detail-header">
+          <div class="status-badge" [ngClass]="getStatusClass(maintenanceRequest.status)">
+            {{ maintenanceRequest.status | titlecase }}
+          </div>
+          <div class="priority-badge" [ngClass]="getPriorityClass(maintenanceRequest.priority)">
+            {{ maintenanceRequest.priority | titlecase }} Priority
+          </div>
+        </div>
+
+        <div class="detail-content">
+          <h2>{{ maintenanceRequest.title }}</h2>
+          <p class="detail-meta">
+            <span>Submitted: {{ maintenanceRequest.createdAt | date:'medium' }}</span>
+            <span>Property ID: {{ maintenanceRequest.propertyId }}</span>
+            <span>Category: {{ maintenanceRequest.category | titlecase }}</span>
+          </p>
+
+          <div class="detail-section">
+            <h3>Description</h3>
+            <p>{{ maintenanceRequest.description }}</p>
+          </div>
+
+          <div class="detail-section" *ngIf="maintenanceRequest.preferredAvailability">
+            <h3>Preferred Availability</h3>
+            <p>{{ maintenanceRequest.preferredAvailability }}</p>
+          </div>
+
+          <div class="detail-section" *ngIf="maintenanceRequest.permissionToEnter !== undefined">
+            <h3>Permission to Enter</h3>
+            <p>{{ maintenanceRequest.permissionToEnter ? 'Yes' : 'No' }}</p>
+          </div>
+
+          <div class="detail-section" *ngIf="maintenanceRequest.assignedTo">
+            <h3>Assigned To</h3>
+            <p>{{ maintenanceRequest.assignedTo }}</p>
+            <p *ngIf="maintenanceRequest.assignedAt">Assigned at: {{ maintenanceRequest.assignedAt | date:'medium' }}</p>
+          </div>
+
+          <div class="detail-section" *ngIf="maintenanceRequest.scheduledDate">
+            <h3>Scheduled Date</h3>
+            <p>{{ maintenanceRequest.scheduledDate | date:'medium' }}</p>
+          </div>
+
+          <div class="detail-section" *ngIf="maintenanceRequest.completedAt">
+            <h3>Completed At</h3>
+            <p>{{ maintenanceRequest.completedAt | date:'medium' }}</p>
+          </div>
+
+          <div class="detail-section" *ngIf="maintenanceRequest.notes && maintenanceRequest.notes.length > 0">
+            <h3>Notes</h3>
+            <div class="notes-list">
+              <div *ngFor="let note of maintenanceRequest.notes" class="note-item">
+                <div class="note-header">
+                  <span class="note-author">{{ note.addedBy }}</span>
+                  <span class="note-date">{{ note.addedAt | date:'short' }}</span>
+                  <span *ngIf="!note.isPublic" class="note-private">Private</span>
+                </div>
+                <p class="note-text">{{ note.text }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-section" *ngIf="maintenanceRequest.cost && maintenanceRequest.cost.amount > 0">
+            <h3>Cost</h3>
+            <p>{{ maintenanceRequest.cost.amount | currency:maintenanceRequest.cost.currency }}</p>
+            <p *ngIf="maintenanceRequest.cost.details">{{ maintenanceRequest.cost.details }}</p>
+          </div>
+
+          <div class="detail-section" *ngIf="maintenanceRequest.rating && maintenanceRequest.rating.score">
+            <h3>Rating</h3>
+            <div class="rating-display">
+              <div class="rating-stars">
+                <span *ngFor="let star of [1,2,3,4,5]" class="star" [class.filled]="star <= maintenanceRequest.rating!.score">★</span>
+              </div>
+              <p *ngIf="maintenanceRequest.rating.comment">{{ maintenanceRequest.rating.comment }}</p>
+              <p *ngIf="maintenanceRequest.rating.ratedAt">Rated at: {{ maintenanceRequest.rating.ratedAt | date:'medium' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-actions">
+          <ng-container [ngSwitch]="maintenanceRequest.status">
+            <ng-container *ngSwitchCase="'pending'">
+              <button class="btn-secondary" (click)="updateStatus('canceled')">Cancel Request</button>
+              <button class="btn-primary" *ngIf="currentUser?.role !== 'tenant'" (click)="updateStatus('assigned')">Assign</button>
+            </ng-container>
+
+            <ng-container *ngSwitchCase="'assigned'">
+              <button class="btn-secondary" (click)="updateStatus('canceled')">Cancel Request</button>
+              <button class="btn-primary" *ngIf="currentUser?.role !== 'tenant'" (click)="updateStatus('in_progress')">Start Work</button>
+            </ng-container>
+
+            <ng-container *ngSwitchCase="'in_progress'">
+              <button class="btn-primary" *ngIf="currentUser?.role !== 'tenant'" (click)="updateStatus('completed')">Mark Complete</button>
+            </ng-container>
+
+            <ng-container *ngSwitchCase="'completed'">
+              <button class="btn-secondary" *ngIf="currentUser?.role === 'tenant' && !maintenanceRequest.rating" (click)="showRatingForm = true">Rate Service</button>
+            </ng-container>
+          </ng-container>
+
+          <button class="btn-secondary" *ngIf="currentUser?.role !== 'tenant'" (click)="showNoteForm = true">Add Note</button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

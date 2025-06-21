@@ -1,0 +1,63 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <div class="welcome-section">
+      <h1>Dashboard</h1>
+      <h2 *ngIf="authService.currentUserValue">Welcome, {{ authService.currentUserValue.email }}!</h2>
+    </div>
+  </div>
+
+  <div class="dashboard-content">
+    <div class="dashboard-message">
+      <p>Please use the navigation menu to access the features appropriate for your role.</p>
+
+      <div *ngIf="authService.currentUserValue?.role === 'tenant'" class="role-message">
+        <h3>Tenant Features</h3>
+        <p>As a tenant, you can:</p>
+        <ul>
+          <li>Browse available rental properties</li>
+          <li>Submit rental applications</li>
+          <li>View your application status</li>
+          <li>Manage your active leases</li>
+          <li>Submit maintenance requests</li>
+          <li>Make payments</li>
+        </ul>
+        <a routerLink="/tenant-dashboard" class="btn-primary">Go to Tenant Dashboard</a>
+      </div>
+
+      <div *ngIf="authService.currentUserValue?.role === 'property_owner'" class="role-message">
+        <h3>Property Owner Features</h3>
+        <p>As a property owner, you can:</p>
+        <ul>
+          <li>Manage your properties</li>
+          <li>Review rental applications</li>
+          <li>Manage leases</li>
+          <li>Assign property managers</li>
+          <li>Handle maintenance requests</li>
+          <li>Track payments</li>
+        </ul>
+        <div class="dashboard-actions">
+          <a routerLink="/properties" class="btn-primary">Manage Properties</a>
+          <a routerLink="/applications" class="btn-primary">Review Applications</a>
+          <a routerLink="/leases" class="btn-primary">Manage Leases</a>
+        </div>
+      </div>
+
+      <div *ngIf="authService.currentUserValue?.role === 'property_manager'" class="role-message">
+        <h3>Property Manager Features</h3>
+        <p>As a property manager, you can:</p>
+        <ul>
+          <li>View assigned properties</li>
+          <li>Review rental applications</li>
+          <li>Manage leases</li>
+          <li>Handle maintenance requests</li>
+          <li>Track payments</li>
+        </ul>
+        <div class="dashboard-actions">
+          <a routerLink="/properties" class="btn-primary">View Properties</a>
+          <a routerLink="/applications" class="btn-primary">Review Applications</a>
+          <a routerLink="/leases" class="btn-primary">Manage Leases</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

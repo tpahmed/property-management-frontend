@@ -1,0 +1,136 @@
+<div class="property-application-container">
+  <div class="header-section">
+    <h1>Rental Application</h1>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading property details...</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="isSubmitted" class="success-message">
+    <h2>Application Submitted Successfully!</h2>
+    <p>Your application has been received. We will review it and get back to you soon.</p>
+    <p>Application ID: {{ applicationId }}</p>
+    <div class="action-buttons">
+      <button class="btn-primary" routerLink="/my-applications">View My Applications</button>
+      <button class="btn-secondary" routerLink="/available-rentals">Browse More Properties</button>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading && !isSubmitted && property" class="application-content">
+    <div class="property-summary">
+      <h2>{{ property.title }}</h2>
+      <p class="property-address">{{ property.address }}, {{ property.city }}, {{ property.state }} {{ property.zipCode }}</p>
+
+      <div class="property-details">
+        <div class="detail-row">
+          <span class="label">Property Type:</span>
+          <span class="value">{{ property.propertyType | titlecase }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Bedrooms:</span>
+          <span class="value">{{ property.bedrooms }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Bathrooms:</span>
+          <span class="value">{{ property.bathrooms }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Area:</span>
+          <span class="value">{{ property.area }} sqft</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Monthly Rent:</span>
+          <span class="value">${{ property.rentAmount }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Security Deposit:</span>
+          <span class="value">${{ property.securityDeposit }}</span>
+        </div>
+      </div>
+    </div>
+
+    <form [formGroup]="applicationForm" (ngSubmit)="submitApplication()" class="application-form">
+      <h3>Application Details</h3>
+
+      <div class="form-group">
+        <label for="moveInDate">Desired Move-in Date</label>
+        <input type="date" id="moveInDate" formControlName="moveInDate" class="form-control">
+        <div *ngIf="applicationForm.get('moveInDate')?.invalid && applicationForm.get('moveInDate')?.touched" class="error-text">
+          Move-in date is required
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="leaseTerm">Lease Term (months)</label>
+        <select id="leaseTerm" formControlName="leaseTerm" class="form-control">
+          <option value="6">6 months</option>
+          <option value="12">12 months</option>
+          <option value="18">18 months</option>
+          <option value="24">24 months</option>
+        </select>
+        <div *ngIf="applicationForm.get('leaseTerm')?.invalid && applicationForm.get('leaseTerm')?.touched" class="error-text">
+          Lease term is required
+        </div>
+      </div>
+
+      <h3>Employment Information</h3>
+
+      <div class="form-group">
+        <label for="employer">Current Employer</label>
+        <input type="text" id="employer" formControlName="employer" class="form-control">
+        <div *ngIf="applicationForm.get('employer')?.invalid && applicationForm.get('employer')?.touched" class="error-text">
+          Employer name is required
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="position">Position</label>
+        <input type="text" id="position" formControlName="position" class="form-control">
+        <div *ngIf="applicationForm.get('position')?.invalid && applicationForm.get('position')?.touched" class="error-text">
+          Position is required
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="monthlyIncome">Monthly Income ($)</label>
+        <input type="number" id="monthlyIncome" formControlName="monthlyIncome" class="form-control">
+        <div *ngIf="applicationForm.get('monthlyIncome')?.invalid && applicationForm.get('monthlyIncome')?.touched" class="error-text">
+          Monthly income is required
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="employmentLength">Employment Length (months)</label>
+        <input type="number" id="employmentLength" formControlName="employmentLength" class="form-control">
+        <div *ngIf="applicationForm.get('employmentLength')?.invalid && applicationForm.get('employmentLength')?.touched" class="error-text">
+          Employment length is required
+        </div>
+      </div>
+
+      <h3>Additional Information</h3>
+
+      <div class="form-group">
+        <label for="creditScore">Credit Score (optional)</label>
+        <input type="number" id="creditScore" formControlName="creditScore" class="form-control">
+      </div>
+
+      <div class="form-group">
+        <label for="additionalNotes">Additional Notes (optional)</label>
+        <textarea id="additionalNotes" formControlName="additionalNotes" rows="4" class="form-control"></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" routerLink="/available-rentals">Cancel</button>
+        <button type="submit" class="btn-primary" [disabled]="applicationForm.invalid || isSubmitting">
+          {{ isSubmitting ? 'Submitting...' : 'Submit Application' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

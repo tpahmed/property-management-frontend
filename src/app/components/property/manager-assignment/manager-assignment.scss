@@ -1,0 +1,332 @@
+.manager-assignment-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .header-section {
+    margin-bottom: 24px;
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      color: #333;
+    }
+
+    p {
+      margin: 0;
+      color: #666;
+      font-size: 16px;
+    }
+  }
+
+  .loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top-color: #3498db;
+      animation: spin 1s ease-in-out infinite;
+      margin-bottom: 16px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  }
+
+  .alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+
+  .alert-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    margin-bottom: 20px;
+
+    .empty-icon {
+      font-size: 48px;
+      color: #bbb;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      margin: 0 0 8px;
+      color: #555;
+    }
+
+    p {
+      margin: 0 0 24px;
+      color: #777;
+    }
+
+    .btn-primary {
+      background-color: #3498db;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: #2980b9;
+      }
+    }
+  }
+
+  .assignment-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+
+    .assignment-form {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 24px;
+
+      h2 {
+        margin: 0 0 20px;
+        font-size: 20px;
+        color: #333;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+
+        label {
+          display: block;
+          margin-bottom: 6px;
+          font-weight: 500;
+          color: #555;
+        }
+
+        select, input {
+          width: 100%;
+          padding: 10px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          font-size: 14px;
+
+          &:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+          }
+        }
+
+        .form-hint {
+          display: block;
+          margin-top: 6px;
+          font-size: 12px;
+          color: #777;
+        }
+
+        .search-container {
+          position: relative;
+
+          .search-spinner {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: #3498db;
+            animation: spin 1s ease-in-out infinite;
+          }
+        }
+
+        .search-results {
+          position: absolute;
+          width: calc(100% - 48px);
+          max-height: 200px;
+          overflow-y: auto;
+          background-color: white;
+          border: 1px solid #ddd;
+          border-radius: 0 0 4px 4px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          z-index: 10;
+
+          .manager-result {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+
+            &:hover {
+              background-color: #f5f5f5;
+            }
+
+            &:last-child {
+              border-bottom: none;
+            }
+
+            .manager-name {
+              font-weight: 500;
+              color: #333;
+            }
+
+            .manager-email {
+              font-size: 12px;
+              color: #666;
+            }
+          }
+        }
+      }
+
+      .btn-primary {
+        background-color: #3498db;
+        color: white;
+        padding: 10px 16px;
+        border-radius: 4px;
+        font-weight: 500;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.2s;
+
+        &:hover:not(:disabled) {
+          background-color: #2980b9;
+        }
+
+        &:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+        }
+      }
+    }
+
+    .current-managers {
+      h2 {
+        margin: 0 0 20px;
+        font-size: 20px;
+        color: #333;
+      }
+
+      .empty-managers {
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        color: #777;
+      }
+
+      .manager-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .property-manager-card {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+
+        .property-info {
+          padding: 16px;
+          background-color: #f5f5f5;
+          border-bottom: 1px solid #eee;
+
+          h3 {
+            margin: 0 0 4px;
+            font-size: 18px;
+            color: #333;
+          }
+
+          .property-address {
+            margin: 0;
+            font-size: 14px;
+            color: #666;
+          }
+        }
+
+        .manager-info {
+          padding: 16px;
+
+          h4 {
+            margin: 0 0 12px;
+            font-size: 16px;
+            color: #555;
+          }
+
+          .manager-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            .manager-email {
+              margin: 0;
+              font-size: 14px;
+              color: #333;
+            }
+
+            .btn-remove {
+              background-color: #f44336;
+              color: white;
+              border: none;
+              padding: 6px 12px;
+              border-radius: 4px;
+              font-size: 12px;
+              font-weight: 500;
+              cursor: pointer;
+              transition: background-color 0.2s;
+
+              &:hover {
+                background-color: #d32f2f;
+              }
+            }
+          }
+
+          .no-manager {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+            color: #777;
+          }
+        }
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    .assignment-content {
+      .assignment-form {
+        order: 1;
+      }
+
+      .current-managers {
+        order: 2;
+      }
+    }
+  }
+}
